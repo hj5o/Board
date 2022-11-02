@@ -22,9 +22,11 @@ public class BoardController {
     }
 
     @PostMapping("/board/form/process")
-    public String formProcess(Board board) {
+    public String formProcess(Board board, Model model) {
         boardService.trans(board);
-        return "redirect:/board/list";
+        model.addAttribute("message", "글 작성 완료");
+        model.addAttribute("url", "/board/list");
+        return "board/message";
     }
 
     @GetMapping("/board/list")
@@ -45,17 +47,30 @@ public class BoardController {
         model.addAttribute("board", boardService.boardView(id));
         return "board/update";
     }
+//    @PostMapping("/board/update/{id}")
+//    public String boardUpdate(@PathVariable("id") Integer id, Board board) {
+//        Board boardTemp = boardService.boardView(id);
+//        boardTemp.setTitle(board.getTitle());
+//        boardTemp.setContent(board.getContent());
+//        boardService.trans(boardTemp);
+//        return "redirect:/board/list";
+//    }
     @PostMapping("/board/update/{id}")
-    public String boardUpdate(@PathVariable("id") Integer id, Board board) {
+    public String boardUpdate(@PathVariable("id") Integer id, Board board, Model model) {
         Board boardTemp = boardService.boardView(id);
         boardTemp.setTitle(board.getTitle());
         boardTemp.setContent(board.getContent());
-        return "redirect:/board/list";
+        boardService.trans(boardTemp);
+        model.addAttribute("message", "글 수정 완료");
+        model.addAttribute("url", "/board/list");
+        return "board/message";
     }
 
     @GetMapping("/board/delete")
-    public String boardDelete(Integer id) {
+    public String boardDelete(Integer id, Model model) {
         boardService.boardDelete(id);
-        return "redirect:/board/list";
+        model.addAttribute("message", "글 삭제 완료");
+        model.addAttribute("url", "/board/list");
+        return "board/message";
     }
 }
