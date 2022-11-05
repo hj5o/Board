@@ -2,13 +2,15 @@ package hj5o.board.practice1.controller;
 
 import hj5o.board.practice1.entity.Board;
 import hj5o.board.practice1.service.BoardService;
+import hj5o.board.practice1.repository.BoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -16,6 +18,9 @@ public class BoardController {
 
     @Autowired
     private BoardService boardService;
+
+    @Autowired
+    private BoardRepository boardRepository;
 
     @GetMapping("/board/form")
     public String form() {
@@ -31,8 +36,14 @@ public class BoardController {
     }
 
     @GetMapping("/board/list")
-    public String boardList(Model model) {
+    public String boardList(Model model, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+                            @RequestParam(required = false, defaultValue = "") String searchText) {
+        Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(searchText, searchText, pageable);
+        int startPage = Math.max(1, boards.getPageable().getPageNumber() - 4);
+        int endPage = Math.min(boards.getTotalPages(), boards.getPageable().getPageNumber() + 4);
         model.addAttribute("list", boardService.boardList());
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
         return "board/list";
     }
 
